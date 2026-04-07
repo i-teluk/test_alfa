@@ -22,11 +22,11 @@ public class Initializer {
     static{
         try (InputStream input = Initializer.class.getClassLoader().getResourceAsStream("config.properties")) {
             if (input == null) {
-                log.error("Unable to find config.properties");
+                log.error("Unable to find config.properties\n");
             }
             config.load(input);
         } catch (Exception ex) {
-            log.error("Failed to load configuration", ex);
+            log.error("Failed to load configuration: \n", ex);
             throw new ExceptionInInitializerError();
         }
     }
@@ -43,9 +43,9 @@ public class Initializer {
             URI appiumServerURI = new URI(config.getProperty("appium.server.url"));
             URL appiumServerUrl = appiumServerURI.toURL();
             driver = new AndroidDriver(appiumServerUrl, getDesiredCapabilities());
-            log.info("Driver initialized successfully");
+            log.info("Driver initialized successfully\n");
         } catch (Exception ex) {
-            log.error("Driver initialized failed: " + ex);
+            log.error("Driver initialized failed: \n" + ex);
             throw new RuntimeException();
         }
     }
