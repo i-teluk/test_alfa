@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.example'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    qa-mobile()
+}
+
+dependencies {
+    implementation 'io.appium:java-client:10.1.0'
+    implementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
