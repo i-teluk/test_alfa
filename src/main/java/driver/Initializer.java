@@ -1,3 +1,5 @@
+package driver;
+
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +15,16 @@ public class Initializer {
     private static AppiumDriver driver;
     static Properties config = new Properties();
 
+    private Initializer() {
+
+    }
+
     static{
         try (InputStream input = Initializer.class.getClassLoader().getResourceAsStream("config.properties")) {
             if (input == null) {
                 log.error("Unable to find config.properties");
             }
+            config.load(input);
         } catch (Exception ex) {
             log.error("Failed to load configuration", ex);
             throw new ExceptionInInitializerError();
@@ -38,20 +45,20 @@ public class Initializer {
             driver = new AndroidDriver(appiumServerUrl, getDesiredCapabilities());
             log.info("Driver initialized successfully");
         } catch (Exception ex) {
-            log.error("Driver initialized failed");
+            log.error("Driver initialized failed: " + ex);
             throw new RuntimeException();
         }
     }
 
     private static DesiredCapabilities getDesiredCapabilities() {
         DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability("deviceName", config.getProperty("device.name"));
+        capabilities.setCapability("appium:deviceName", config.getProperty("device.name"));
         capabilities.setCapability("platformName", config.getProperty("platform.name"));
-        capabilities.setCapability("app", config.getProperty("app"));
-        capabilities.setCapability("appPackage", config.getProperty("app.package"));
-        capabilities.setCapability("automationName", config.getProperty("automation.name"));
-        capabilities.setCapability("newCommandTimeout", config.getProperty("new.command.timeout"));
-        capabilities.setCapability("appActivity", config.getProperty("app.activity"));
+        capabilities.setCapability("appium:app", config.getProperty("app"));
+        capabilities.setCapability("appium:appPackage", config.getProperty("app.package"));
+        capabilities.setCapability("appium:automationName", config.getProperty("automation.name"));
+        capabilities.setCapability("appium:newCommandTimeout", config.getProperty("new.command.timeout"));
+        capabilities.setCapability("appium:appActivity", config.getProperty("app.activity"));
         return capabilities;
     }
 
