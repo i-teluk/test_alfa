@@ -3,8 +3,10 @@ package screens;
 import helpers.Helper;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 
+@Slf4j
 public class LoginPage {
     private AppiumDriver driver;
     private Helper helper;
@@ -24,38 +26,59 @@ public class LoginPage {
 
     public LoginPage isDisplayed() {
         helper.waitUntilElementIsVisible(buttonConfirm);
-        return new LoginPage(driver);
+        return this;
+    }
+
+    public LoginPage enterLogin(String login) {
+        log.info("Enter login: [{}]", login);
+        driver.findElement(loginField).click();
+        driver.findElement(loginField).sendKeys(login);
+        return this;
+    }
+
+    public LoginPage enterPassword(String password) {
+        log.info("Enter password: [{}]", password);
+        driver.findElement(passwordField).click();
+        driver.findElement(passwordField).sendKeys(password);
+        return this;
+    }
+
+    public LoginPage clickLoginButton() {
+        log.info("Tap on Login button");
+        driver.findElement(buttonConfirm).click();
+        return this;
     }
 
     public LoginPage login(String login, String password) {
-        driver.findElement(loginField).click();
-        driver.findElement(loginField).sendKeys(login);
-        driver.findElement(passwordField).click();
-        driver.findElement(passwordField).sendKeys(password);
-        driver.findElement(buttonConfirm).click();
-        return new LoginPage(driver);
+        enterLogin(login);
+        enterPassword(password);
+        clickLoginButton();
+        return this;
     }
 
     public Boolean checkTitle(String expectedText) {
         return helper.isTextOnScreen(expectedText);
     }
 
-    public String checkValidationField(String login, String password) {
-        driver.findElement(loginField).click();
-        driver.findElement(loginField).sendKeys(login);
-        driver.findElement(passwordField).click();
-        driver.findElement(passwordField).sendKeys(password);
-        driver.findElement(buttonConfirm).click();
-        return driver.findElement(errorMassage).getText();
+    public Boolean checkVisibleOfPassword() {
+        String state = driver.findElement(passwordField).getAttribute("password");
+        if (state.equals("true")) {
+            log.info("The password is masked.");
+            return true;
+        } else {
+            log.info("The password is not masked.");
+            return false;
+        }
     }
 
     public LoginPage clickToShowPassword() {
         driver.findElement(showPassword).click();
-        return new LoginPage(driver);
+        return this;
     }
 
     public EntryResultPage waitUntilLoaderDisappear() {
         helper.waitUntilElementDisappear(loader);
+        log.info("Loader is disappeared");
         return new EntryResultPage(driver);
     }
 }
