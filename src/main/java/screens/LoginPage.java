@@ -3,6 +3,7 @@ package screens;
 import helpers.Helper;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.clipboard.HasClipboard;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 
@@ -20,26 +21,31 @@ public class LoginPage {
     private final By passwordField = AppiumBy.xpath("//android.widget.EditText[@resource-id=\"com.alfabank.qapp:id/etPassword\"]");
     private final By buttonConfirm = AppiumBy.id("com.alfabank.qapp:id/btnConfirm");
     private final By title = AppiumBy.id("com.alfabank.qapp:id/tvTitle");
-    private final By errorMassage = AppiumBy.id("com.alfabank.qapp:id/tvError");
+    private final By errorMessage = AppiumBy.id("com.alfabank.qapp:id/tvError");
     private final By showPassword = AppiumBy.id("com.alfabank.qapp:id/text_input_end_icon");
     private final By loader = AppiumBy.id("com.alfabank.qapp:id/loader");
 
     public LoginPage isDisplayed() {
-        helper.waitUntilElementIsVisible(buttonConfirm);
+        boolean isVisible = driver.findElement(buttonConfirm).isDisplayed();
+        if (!isVisible) {
+            throw new AssertionError("Login page is not displayed");
+        }
         return this;
     }
 
     public LoginPage enterLogin(String login) {
         log.info("Enter login: [{}]", login);
-        driver.findElement(loginField).click();
-        driver.findElement(loginField).sendKeys(login);
+        var element = driver.findElement(loginField);
+        element.click();
+        element.sendKeys(login);
         return this;
     }
 
     public LoginPage enterPassword(String password) {
         log.info("Enter password: [{}]", password);
-        driver.findElement(passwordField).click();
-        driver.findElement(passwordField).sendKeys(password);
+        var element = driver.findElement(passwordField);
+        element.click();
+        element.sendKeys(password);
         return this;
     }
 
@@ -56,13 +62,18 @@ public class LoginPage {
         return this;
     }
 
-    public Boolean checkTitle(String expectedText) {
-        return helper.isTextOnScreen(expectedText);
+    public boolean checkTitle(String expectedText) {
+        return driver.findElement(title).getText().equals(expectedText);
     }
 
-    public Boolean checkVisibleOfPassword() {
+    public boolean checkErrorMessage(String expectedText) {
+        return driver.findElement(errorMessage).getText().equals(expectedText);
+    }
+
+    public boolean checkVisibleOfPassword() {
         String state = driver.findElement(passwordField).getAttribute("password");
-        if (state.equals("true")) {
+        boolean isMasked = Boolean.parseBoolean(state);
+        if (isMasked) {
             log.info("The password is masked.");
             return true;
         } else {
@@ -80,5 +91,14 @@ public class LoginPage {
         helper.waitUntilElementDisappear(loader);
         log.info("Loader is disappeared");
         return new EntryResultPage(driver);
+    }
+
+    public LoginPage enterLoginFromClipboard(String login) {
+        log.info("Enter login from clipboard: [{}]", login);
+        var element = driver.findElement(loginField);
+        element.click();
+        ((HasClipboard) driver).setClipboardText(login);
+        element.sendKeys(((HasClipboard) driver).getClipboardText());
+        return this;
     }
 }

@@ -14,13 +14,17 @@ public class EntryResultPage {
         this.helper = new Helper(driver);
     }
 
-    private final By title = AppiumBy.className("android.widget.TextView"); //На странице нужно добавить id элемента
+    private final By title = AppiumBy.className("android.widget.TextView"); // На экране разработчику нужно добавить id элемента
 
-    public void isDisplayed() {
-        helper.waitUntilElementIsVisible(title);
+    public EntryResultPage isDisplayed() {
+        boolean isVisible = driver.findElement(title).isDisplayed();
+        if (!isVisible) {
+            throw new AssertionError("Entry page is not displayed");
+        }
+        return this;
     }
 
-    public Boolean checkTitle(String expectedText) {
-        return helper.isTextOnScreen(expectedText);
+    public boolean checkTitle(String expectedText) {
+        return driver.findElement(title).getText().equals(expectedText);
     }
 }

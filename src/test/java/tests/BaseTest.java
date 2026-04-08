@@ -12,14 +12,14 @@ public class BaseTest {
 
     @BeforeEach
     public void setUp() {
-        log.info("Driver initializing before test\n");
+        log.info("Driver initializing before test");
         driver = Initializer.getDriver();
-        log.info("!!!!! Starting the Test !!!!!\n");
+        log.info("!!!!! Starting the Test !!!!!");
     }
 
     @AfterEach
     public void tearDown() {
         Initializer.quitDriver();
-        log.info("Driver closed after test\n");
+        log.info("Driver closed after test");
     }
 }

@@ -16,24 +16,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class AlfaQALoginTests extends BaseTest {
-    private static final String errorMessage = "Ожидаемый текст не отобразился на экране";
+    private static final String errorMessage = "Ожидаемое сообщение об ошибке не отобразилось: %s";
     private static final String errorMaskMessage = "Состояние маскирования не соответствует ожидаемому";
 
     @Test
     @DisplayName("Проверяем успешное логирование")
     void successfullyLogin() {
-        LoginPage loginPage = new LoginPage(driver);
-        EntryResultPage entryResultPage = new EntryResultPage(driver);
-
-        loginPage.isDisplayed()
+        String expectedText = "Вход в Alfa-Test выполнен";
+        EntryResultPage entryResultPage = new LoginPage(driver)
+                .isDisplayed()
                 .login("Login", "Password")
                 .waitUntilLoaderDisappear()
                 .isDisplayed();
-
-        assertAll("Проверяем отображение текста на двух экранах",
-                () -> assertTrue(loginPage.checkTitle("Вход в Alfa-Test"), errorMessage),
-                () -> assertTrue(entryResultPage.checkTitle("Вход в Alfa-Test выполнен"), errorMessage)
-        );
+        assertTrue(entryResultPage.checkTitle(expectedText), errorMessage.formatted(expectedText));
     }
 
     static Stream<Arguments> argumentsForTestLoginField() {
@@ -53,7 +48,7 @@ public class AlfaQALoginTests extends BaseTest {
     // но у меня не получилось подключить charles к эмуляции.
     @ParameterizedTest(name = "{0}")
     @MethodSource("argumentsForTestLoginField")
-    @DisplayName("Проверяем валидацию поля Логин, негативные кейсы")
+    @DisplayName("Проверяем валидацию поля Логин, отображение InvalidValue")
     void checkValidationLoginField(String testName, String login, String errorText) {
         LoginPage loginPage = new LoginPage(driver);
 
@@ -61,18 +56,18 @@ public class AlfaQALoginTests extends BaseTest {
                 .login(login, "Password")
                 .waitUntilLoaderDisappear();
 
-        assertTrue(loginPage.checkTitle(errorText), errorMessage);
+        assertTrue(loginPage.checkErrorMessage(errorText), errorMessage.formatted(errorText));
     }
 
     @Test
     @DisplayName("Проверяем маскирование поля Пароль")
     void checkTheMasking() {
         LoginPage loginPage = new LoginPage(driver);
-        Boolean firstStateIsMasked = loginPage.isDisplayed()
+        boolean firstStateIsMasked = loginPage.isDisplayed()
                 .enterPassword("Password")
                 .checkVisibleOfPassword();
-        Boolean secondStateIsUnmasked = loginPage.clickToShowPassword().checkVisibleOfPassword();
-        Boolean thirdStateIsMasked = loginPage.clickToShowPassword().checkVisibleOfPassword();
+        boolean secondStateIsUnmasked = loginPage.clickToShowPassword().checkVisibleOfPassword();
+        boolean thirdStateIsMasked = loginPage.clickToShowPassword().checkVisibleOfPassword();
 
         assertAll("Проверяем состояние маскирования поля Пароль, после каждого нажатия на значок маскирования",
                 () -> assertTrue(firstStateIsMasked, errorMaskMessage),
@@ -94,7 +89,7 @@ public class AlfaQALoginTests extends BaseTest {
     // Во всех остальных случаях валидация на фронте не работает.
     @ParameterizedTest(name = "{0}")
     @MethodSource("argumentsForTestPasswordField")
-    @DisplayName("Проверяем валидацию поля Пароль, негативные кейсы")
+    @DisplayName("Проверяем валидацию поля Пароль, отображение InvalidValue")
     void checkValidationPasswordField(String testName, String password, String errorText) {
         LoginPage loginPage = new LoginPage(driver);
 
@@ -102,6 +97,22 @@ public class AlfaQALoginTests extends BaseTest {
                 .login("Login", password)
                 .waitUntilLoaderDisappear();
 
-        assertTrue(loginPage.checkTitle(errorText), errorMessage);
+        assertTrue(loginPage.checkErrorMessage(errorText), errorMessage.formatted(errorText));
+    }
+
+    //Согласно требованиям, должно быть другое валидационное сообщение.
+    @ParameterizedTest(name = "{0}")
+    @DisplayName("Проверяем вставку в поле Логин из буфера обмена и отображение ExceptValue")
+    @MethodSource("argumentsForTestLoginField")
+    void checkInputFromClipboardForLoginField(String testName, String login, String errorText) {
+        LoginPage loginPage = new LoginPage(driver);
+
+        loginPage.isDisplayed()
+                .enterLoginFromClipboard(login)
+                .enterPassword("Password")
+                .clickLoginButton()
+                .waitUntilLoaderDisappear();
+
+        assertTrue(loginPage.checkErrorMessage(errorText), errorMessage.formatted(errorText));
     }
 }

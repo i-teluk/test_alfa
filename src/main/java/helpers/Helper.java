@@ -10,22 +10,18 @@ import java.time.Duration;
 public class Helper {
 
     private AppiumDriver driver;
+    private WebDriverWait wait;
 
     public Helper(AppiumDriver driver) {
         this.driver = driver;
-    }
-
-    public Boolean isTextOnScreen(String expectedText) {
-        return driver.getPageSource().contains(expectedText);
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
     public void waitUntilElementIsVisible(By element) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         wait.until(ExpectedConditions.visibilityOfElementLocated(element));
     }
 
     public void waitUntilElementDisappear(By element) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         wait.until(ExpectedConditions.invisibilityOfElementLocated(element));
     }
 }
