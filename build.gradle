@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'io.qameta.allure' version '2.11.2'
 }
 
 group = 'com.alfa-test'
@@ -9,6 +10,8 @@ repositories {
     mavenCentral()
 }
 
+def allureVersion = "2.21.0"
+
 dependencies {
     implementation 'io.appium:java-client:10.1.0'
     implementation 'org.junit.jupiter:junit-jupiter:5.10.0'
@@ -17,12 +20,28 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.25.4'
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.25.4'
     implementation 'org.assertj:assertj-core:3.27.7'
-    compileOnly("org.projectlombok:lombok:1.18.44")
-    annotationProcessor("org.projectlombok:lombok:1.18.44")
+    compileOnly 'org.projectlombok:lombok:1.18.44'
+    annotationProcessor 'org.projectlombok:lombok:1.18.44'
     testCompileOnly "org.projectlombok:lombok:1.18.44"
     testAnnotationProcessor "org.projectlombok:lombok:1.18.44"
     implementation 'org.jetbrains:annotations:24.0.0'
     implementation 'org.apache.commons:commons-lang3:3.18.0'
+    implementation 'io.qameta.allure:allure-bom:2.33.0'
+    testImplementation 'io.qameta.allure:allure-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+}
+
+allure {
+    version = allureVersion
+    adapter {
+        autoconfigure = true
+        aspectjweaver = true
+        frameworks {
+            junit5 {
+                adapterVersion.set(allureVersion)
+            }
+        }
+    }
 }
 
 test {

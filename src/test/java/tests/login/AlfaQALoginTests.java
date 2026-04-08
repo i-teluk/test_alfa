@@ -47,8 +47,10 @@ public class AlfaQALoginTests extends BaseTest {
         );
     }
 
-    // Запрос authorize не отправляется только в кейсе с 51 символом.
-    // Во всех остальных случаях валидация на фронте не работает.
+    // Запрос authorize не отправляется только в кейсах с 51 символом и пустым полем.
+    // Во всех остальных случаях валидация на фронте не работает и запрос отправляется.
+    // В позитивных кейсах, нужно проверять, что отправляется запрос authorize с мобилки,
+    // но у меня не получилось подключить charles к эмуляции.
     @ParameterizedTest(name = "{0}")
     @MethodSource("argumentsForTestLoginField")
     @DisplayName("Проверяем валидацию поля Логин, негативные кейсы")
@@ -77,5 +79,29 @@ public class AlfaQALoginTests extends BaseTest {
                 () -> assertFalse(secondStateIsUnmasked, errorMaskMessage),
                 () -> assertTrue(thirdStateIsMasked, errorMaskMessage)
         );
+    }
+
+    static Stream<Arguments> argumentsForTestPasswordField() {
+        String errorText = "Введены неверные данные";
+        return Stream.of(
+                arguments("Пустое поле Пароль", "", errorText),
+                arguments("Пароль [A-Z, a-z] длинной 51 символ", RandomStringUtils.randomAlphabetic(51), errorText),
+                arguments("Кириллица в Пароле", "Пароль", errorText)
+        );
+    }
+
+    // Запрос authorize не отправляется только в кейсах с 51 символом и пустым полем.
+    // Во всех остальных случаях валидация на фронте не работает.
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("argumentsForTestPasswordField")
+    @DisplayName("Проверяем валидацию поля Пароль, негативные кейсы")
+    void checkValidationPasswordField(String testName, String password, String errorText) {
+        LoginPage loginPage = new LoginPage(driver);
+
+        loginPage.isDisplayed()
+                .login("Login", password)
+                .waitUntilLoaderDisappear();
+
+        assertTrue(loginPage.checkTitle(errorText), errorMessage);
     }
 }
